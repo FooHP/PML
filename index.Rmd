@@ -1,0 +1,12 @@
+---
+title: "PML Course Project"
+author: "Foo HP"
+date: "Monday, December 21, 2015"
+output: html_document
+---
+
+
+```{r}
+summary(cars)
+```
+
