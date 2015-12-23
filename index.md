@@ -1,6 +1,6 @@
 # Analysis of Weight Lifting Exercise dataset
 Foo HP  
-Monday, December 21, 2015  
+Thursday, December 24, 2015  
 ## Synopsis
  
 The objective of this project is to use data from <http://groupware.les.inf.puc-rio.br/har> (see the section on the Weight Lifting Exercise Dataset) to investigate "how (well)" an activity was performed by the wearer.
@@ -62,21 +62,30 @@ Next, check for near zero variance predictors from the remaining 52 predictor va
 Similarly, the trimmed Test dataset(Trim_Test) also contain 52 predictor variables.
 
 
-## Cross Validation
+## Cross Validation & Out of sample error
+
 Split the Trim_Training dataset into training (60%) and testing (40%) datasets using 
-createDataPartition. Build a model on the training subset and evaluate on the testing subset.
+createDataPartition. Build a model on the training subset and evaluate on the testing subset (held out).
+
+Out of sample error is the error resulted from applying the prediction algorithm to a new data set. I expect the out of sample error to be small.  To accurately estimate the out of sample error ,it is important to hold out an untouched sample (e.g. testing subset). Using ConfusionMatrix, the estimated out of sample error is computed as (1- accuracy). 
 
 ## Build Model - Classification Tree
-Fit classification tree as a model on the training subset. Plot the classification Tree. Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit1) is 0.5654 The out of sample error is (1- accuracy) =  **0.4346**
+Fit classification tree as a model on the training subset. Plot the classification Tree. Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit1) is 0.5654 The estimated out of sample error is (1- accuracy) =  **0.4346**
 
 ## Build Model - Random Forest
-Fit model on the training subset using randomForest algorithm .Plot Dotchart of variable importance as measured by Random Forest.Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit2) is 0.9918  The out of sample error is (1- accuracy) = **0.0082** 
+Fit model on the training subset using randomForest algorithm .Plot Dotchart of variable importance as measured by Random Forest.Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit2) is 0.9918  The estimated out of sample error is (1- accuracy) = **0.0082** 
 
 ## Conclusion 
-The model Fit 2 ,built using randomForest algorithm is a better model (0.9918) compared to Classification Tree (0.5654) in terms of accuracy. As such this model will be  used to predict the 20 different test cases . 
+The model Fit 2 ,built using randomForest algorithm is a better model (0.9918) compared to Classification Tree (0.5654) in terms of higher accuracy and lower out of sample error 
+(0.0082) compared to (0.4346). As such this model will be  used to predict the 20 different test cases . 
 The prediction result is :
 
   B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B  
+
+## Reference
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
 
 
 \newpage
@@ -184,6 +193,31 @@ Build Model - Classification Tree
 
 ```r
 Fit1 <- train(classe~ .,data=training,method="rpart")
+print(Fit1)
+```
+
+```
+## CART 
+## 
+## 11776 samples
+##    52 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 11776, 11776, 11776, 11776, 11776, 11776, ... 
+## Resampling results across tuning parameters:
+## 
+##   cp          Accuracy   Kappa       Accuracy SD  Kappa SD  
+##   0.02990033  0.5548401  0.42538392  0.02980299   0.04644506
+##   0.04648196  0.4879813  0.33084705  0.03610585   0.06443066
+##   0.11568581  0.3170101  0.04931123  0.04120861   0.06167437
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was cp = 0.02990033.
+```
+
+```r
 print(Fit1$finalModel)
 ```
 
@@ -258,6 +292,28 @@ confusionMatrix(P1,testing$classe)         # Create a confusion matrix
 
 ```r
 Fit2 <- randomForest(classe ~ .,data=training)
+print(Fit2)
+```
+
+```
+## 
+## Call:
+##  randomForest(formula = classe ~ ., data = training) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 7
+## 
+##         OOB estimate of  error rate: 0.67%
+## Confusion matrix:
+##      A    B    C    D    E  class.error
+## A 3345    3    0    0    0 0.0008960573
+## B   13 2261    5    0    0 0.0078982010
+## C    0   17 2034    3    0 0.0097370983
+## D    1    0   29 1898    2 0.0165803109
+## E    0    0    2    4 2159 0.0027713626
+```
+
+```r
 varImpPlot(Fit2,type=2)
 ```
 

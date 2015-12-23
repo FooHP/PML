@@ -1,7 +1,7 @@
 ---
 title: "Analysis of Weight Lifting Exercise dataset"
 author: "Foo HP"
-date: "Monday, December 21, 2015"
+date: "Thursday, December 24, 2015"
 output: 
     html_document:
       keep_md: TRUE
@@ -66,21 +66,30 @@ Next, check for near zero variance predictors from the remaining 52 predictor va
 Similarly, the trimmed Test dataset(Trim_Test) also contain 52 predictor variables.
 
 
-## Cross Validation
+## Cross Validation & Out of sample error
+
 Split the Trim_Training dataset into training (60%) and testing (40%) datasets using 
-createDataPartition. Build a model on the training subset and evaluate on the testing subset.
+createDataPartition. Build a model on the training subset and evaluate on the testing subset (held out).
+
+Out of sample error is the error resulted from applying the prediction algorithm to a new data set. I expect the out of sample error to be small.  To accurately estimate the out of sample error ,it is important to hold out an untouched sample (e.g. testing subset). Using ConfusionMatrix, the estimated out of sample error is computed as (1- accuracy). 
 
 ## Build Model - Classification Tree
-Fit classification tree as a model on the training subset. Plot the classification Tree. Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit1) is 0.5654 The out of sample error is (1- accuracy) =  **0.4346**
+Fit classification tree as a model on the training subset. Plot the classification Tree. Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit1) is 0.5654 The estimated out of sample error is (1- accuracy) =  **0.4346**
 
 ## Build Model - Random Forest
-Fit model on the training subset using randomForest algorithm .Plot Dotchart of variable importance as measured by Random Forest.Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit2) is 0.9918  The out of sample error is (1- accuracy) = **0.0082** 
+Fit model on the training subset using randomForest algorithm .Plot Dotchart of variable importance as measured by Random Forest.Predict on the testing subset and tabulate the predictions of the model against the actual outcome using ConfusionMatrix. The accuracy of this model (Fit2) is 0.9918  The estimated out of sample error is (1- accuracy) = **0.0082** 
 
 ## Conclusion 
-The model Fit 2 ,built using randomForest algorithm is a better model (0.9918) compared to Classification Tree (0.5654) in terms of accuracy. As such this model will be  used to predict the 20 different test cases . 
+The model Fit 2 ,built using randomForest algorithm is a better model (0.9918) compared to Classification Tree (0.5654) in terms of higher accuracy and lower out of sample error 
+(0.0082) compared to (0.4346). As such this model will be  used to predict the 20 different test cases . 
 The prediction result is :
 
   B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B  
+
+## Reference
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
 
 
 \newpage
@@ -125,10 +134,13 @@ training <-Trim_Training[inTrain, ]
 testing <-Trim_Training[-inTrain, ]
 dim(training)
 dim(testing)
+
+
 ```
 Build Model - Classification Tree
 ```{r}
 Fit1 <- train(classe~ .,data=training,method="rpart")
+print(Fit1)
 print(Fit1$finalModel)
 rattle::fancyRpartPlot(Fit1$finalModel)    # plot the classification tree
 P1 <- predict(Fit1,newdata=testing)        # predict on testing subset
@@ -138,6 +150,7 @@ confusionMatrix(P1,testing$classe)         # Create a confusion matrix
 #Build Model - Random Forest
 ```{r,fig.width =8,fig.height = 8}
 Fit2 <- randomForest(classe ~ .,data=training)
+print(Fit2)
 varImpPlot(Fit2,type=2)
 P2 <- predict(Fit2,newdata=testing)
 confusionMatrix(P2,testing$classe)
